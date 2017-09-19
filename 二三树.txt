@@ -1,0 +1,190 @@
+#include<iostream> 
+#include<cstring> 
+#include<string> 
+using namespace std; 
+class TTNode 
+{ 
+public: 
+    int lkey; 
+    int rkey; 
+    int EMPTYKEY; 
+    TTNode* left; 
+    TTNode* center; 
+    TTNode* right; 
+    TTNode(){ 
+        center=left=right=NULL; 
+        lkey=rkey=EMPTYKEY=0; 
+    } 
+    TTNode(int lk,int rk, TTNode*p1,TTNode* p2, TTNode*p3) { 
+        lkey = lk; 
+        rkey = rk; 
+        left = p1; 
+        center = p2; 
+        right = p3; 
+        EMPTYKEY=0; 
+    } 
+    bool isLeaf(){return left==NULL;} 
+    TTNode* add(TTNode* it) { 
+        if (rkey == EMPTYKEY) { 
+            if (lkey <= it->lkey) { 
+                rkey = it->lkey; 
+                right = it->center; 
+                center = it->left; 
+            } 
+            else { 
+                rkey = lkey; 
+                right = center; 
+                lkey = it->lkey; 
+                center = it->center; 
+                left=it->left; 
+            } 
+        return this; 
+        } 
+        else if (lkey>it->lkey) { 
+            TTNode*N1 = new TTNode(lkey, EMPTYKEY,it, this, NULL); 
+            lkey=rkey; 
+            rkey = EMPTYKEY; 
+            left=center; 
+            center=right; 
+            right=NULL; 
+            return N1; 
+        } 
+        else if (rkey <= it->lkey) { 
+            TTNode*N1 = new TTNode(rkey,EMPTYKEY, this, it, NULL); 
+            rkey = EMPTYKEY; 
+            right=NULL; 
+            return N1; 
+        } 
+        else{ 
+            TTNode* N1 = new TTNode(rkey, EMPTYKEY, it->center,right, NULL); 
+            center=it->left; 
+            rkey = EMPTYKEY; 
+            right=NULL; 
+            it->left =this; 
+            it->center=N1; 
+            return it; 
+        } 
+    } 
+  
+}; 
+class TTTree 
+{ 
+private: 
+    int EMPTYKEY; 
+    TTNode* root; 
+public: 
+    TTTree(){ 
+        root=NULL; 
+        EMPTYKEY=0; 
+    } 
+    TTNode* getRoot(){ 
+        return root; 
+    } 
+    void init(){ 
+        root=NULL; 
+    } 
+    TTNode* inserthelp(TTNode* rt, int k) { 
+        TTNode *retval=NULL; 
+        if (rt == NULL) 
+            return new TTNode(k,EMPTYKEY, NULL, NULL, NULL); 
+        if (rt->isLeaf()) 
+            return rt->add(new TTNode(k,EMPTYKEY,NULL, NULL, NULL)); 
+        if (k < rt->lkey) { 
+            retval = inserthelp(rt->left, k); 
+            if (retval == rt->left) 
+                return rt; 
+            else
+                return rt->add(retval); 
+        } 
+        else if((rt->rkey == EMPTYKEY) || (k < rt->rkey)) { 
+            retval = inserthelp(rt->center, k); 
+            if (retval == rt->center) 
+                return rt; 
+            else
+                return rt->add(retval); 
+        } 
+        else{ 
+            retval = inserthelp(rt->right,k); 
+            if (retval == rt->right) 
+                return rt; 
+            else
+                return rt->add(retval); 
+        } 
+    } 
+    void insert(int k){ 
+        root=inserthelp(root,k); 
+    } 
+}; 
+template<typename E> 
+class AQueue 
+{ 
+private: 
+    int maxSize; 
+    int front1; 
+    int rear; 
+    E *listArray; 
+public: 
+    AQueue(int s) 
+    { 
+        maxSize=s; 
+        rear=0; 
+        front1=1; 
+        listArray=new E[s]; 
+    } 
+    void enqueue(const E& it) 
+    { 
+        rear=(rear+1)%maxSize; 
+        listArray[rear]=it; 
+    } 
+    E dequeue() 
+    { 
+        E it=listArray[front1]; 
+        front1=(front1+1)%maxSize; 
+        return it; 
+    } 
+    int length()const
+    { 
+        return((rear+maxSize)-front1+1)%maxSize; 
+    } 
+    void init() 
+    { 
+        rear=0; 
+        front1=1; 
+    } 
+}; 
+  
+int main() 
+{ 
+    TTTree tree; 
+    AQueue<TTNode *> q(100); 
+    int t; 
+    cin>>t; 
+    while(t--){ 
+        int num; 
+        char s; 
+        do{ 
+            cin>>num; 
+            tree.insert(num); 
+            s=cin.get(); 
+        }while((s!='\r')&&(s!='\n')); 
+        q.enqueue(tree.getRoot()); 
+        while(q.length()!=0) 
+        { 
+            TTNode* temp=q.dequeue(); 
+            if(temp!=NULL){ 
+                if(temp==tree.getRoot()) 
+                    cout<<temp->lkey; 
+                else
+                    cout<<" "<<temp->lkey; 
+                if(temp->rkey) 
+                    cout<<" "<<temp->rkey; 
+                q.enqueue(temp->left); 
+                q.enqueue(temp->center); 
+                q.enqueue(temp->right); 
+            } 
+        } 
+        cout<<endl; 
+        tree.init(); 
+        q.init(); 
+    } 
+} //6 6 5 3 1 0 2 6 6 4

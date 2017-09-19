@@ -1,0 +1,298 @@
+1.查找第k大
+#include<iostream> 
+using namespace std; 
+int a[100000]; 
+int main() 
+{    
+    int t,n,k; 
+    cin>>t; 
+    while(t--){ 
+        cin>>n>>k; 
+        for(int i=0;i<n;i++) 
+            cin>>a[i]; 
+        for(int i=0;i<k;i++){ 
+            for(int j=n-1;j>i;j--){ 
+                if(a[j]<a[j-1]){ 
+                    int temp=a[j]; 
+                    a[j]=a[j-1]; 
+                    a[j-1]=temp; 
+                } 
+            } 
+        } 
+        cout<<a[k-1]<<endl; 
+    } 
+  
+} 
+2.推排序
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cstring> 
+#include<list>
+#include<string>
+#include<sstream>
+using namespace std;
+ 
+class heapSort{
+private:
+        int *a;
+        int *b;
+        int n;
+public:
+    heapSort(int *b,int n){
+        this->n=n;
+        a=new int[n];
+        for(int i=0;i<n;i++)
+            a[i]=b[i];
+    }
+    void set(){
+        for(int i=(n-1)/2;i>=0;i--){
+            adjust(a,i,n);
+        }
+    }
+    void adjust(int *p,int i,int len){
+        int lc=(2*i+1);
+        int rc=(2*i+2);
+        if(lc>=len)
+            return;
+        if(rc>=len){
+            if(p[lc]<p[i])
+                swap(p[lc],p[i]);
+            return;
+        }
+        if(p[lc]<p[rc]){
+            if(p[lc]<p[i]){
+                swap(p[lc],p[i]);
+                adjust(p,lc,len);
+            }
+            else
+                return;
+        }
+        else{
+            if(p[rc]<p[i]){
+                swap(p[rc],p[i]);
+                adjust(p,rc,len);
+            }
+            else
+                return;
+        }
+    }
+    void print(){
+        for(int i=0;i<n-1;i++)
+            cout<<a[i]<<" ";
+        cout<<a[n-1]<<endl;
+    }
+    void rprint(){
+        for(int i=n-1;i>0;i--)
+            cout<<a[i]<<" ";
+        cout<<a[0]<<endl;
+    }
+    void sort(){
+        for(int i=1;i<n;i++){
+            b=new int[n-i];
+            for(int j=0;j<n-i;j++)
+                b[j]=a[j+i];
+            for(int j=(n-i-1)/2;j>=0;j--)
+                adjust(b,j,n-i);
+            for(int j=0;j<n-i;j++)
+                a[i+j]=b[j];
+        }   
+    }
+};
+ 
+int main(){
+    string a;
+    while(getline(cin,a)){
+        if(a=="")
+            continue;
+        stringstream in(a);
+        int temp,n=0;
+        int *a=new int[65534];
+        while(in>>temp){
+            a[n]=temp;
+            n++;
+        }
+        heapSort obj(a,n);
+        obj.set();
+        obj.print();
+        obj.sort();
+        obj.rprint();
+    }
+}
+3. 深度优先搜索
+#include<iostream> 
+#include<cstring> 
+using namespace std; 
+int a[100][100]; 
+int mark[100]; 
+int result[100]; 
+int len=0; 
+void dfs(int i,int n) 
+{ 
+    result[len++]=i; 
+    mark[i]=1; 
+    for(int j=0;j<n;j++) 
+        if(a[i][j]&&(!mark[j])) 
+            dfs(j,n); 
+} 
+int main() 
+{ 
+    int t,n,e,s,e1,e2; 
+    cin>>t; 
+    while(t--){ 
+        cin>>n>>e>>s; 
+        for(int i=0;i<n;i++) 
+            for(int j=0;j<n;j++) 
+                a[i][j]=0; 
+        for(int i=0;i<n;i++) 
+            mark[i]=0; 
+        len=0; 
+        while(e--){ 
+            cin>>e1>>e2; 
+            a[e1][e2]=1; 
+            a[e2][e1]=1; 
+        } 
+        dfs(s,n); 
+        for(int i=0;i<len-1;i++) 
+            cout<<result[i]<<" "; 
+        cout<<result[len-1]<<endl; 
+    } 
+    //system("pause"); 
+} 
+4. 广度优先搜索
+#include<iostream> 
+#include<cstring> 
+using namespace std; 
+int a[100][100]; 
+int mark[100]; 
+int result[100]; 
+template<typename E>  
+class AQueue  
+{  
+private:  
+    int maxSize;  
+    int front1;  
+    int rear;  
+    E *listArray;  
+public:  
+    AQueue(int s)  
+    {  
+        maxSize=s;  
+        rear=0;  
+        front1=1;  
+        listArray=new E[s];  
+    }  
+    void enqueue(const E& it)  
+    {  
+        rear=(rear+1)%maxSize;  
+        listArray[rear]=it;  
+    }  
+    E dequeue()  
+    {  
+        E it=listArray[front1];  
+        front1=(front1+1)%maxSize;  
+        return it;  
+    }  
+    int length()const
+    {  
+        return((rear+maxSize)-front1+1)%maxSize;  
+    }  
+    void init()  
+    {  
+        rear=0;  
+        front1=1;  
+    }  
+};  
+  
+int main() 
+{ 
+    int t,n,e,s,e1,e2,len; 
+    AQueue<int> queue(100); 
+    cin>>t; 
+    while(t--){ 
+        cin>>n>>e>>s; 
+        for(int i=0;i<n;i++) 
+            for(int j=0;j<n;j++) 
+                a[i][j]=0; 
+        for(int i=0;i<n;i++) 
+            mark[i]=0; 
+        len=0; 
+        while(e--){ 
+            cin>>e1>>e2; 
+            a[e1][e2]=1; 
+            a[e2][e1]=1; 
+        } 
+        queue.enqueue(s); 
+        mark[s]=1; 
+        while(queue.length()){ 
+            int i=queue.dequeue(); 
+            result[len++]=i; 
+            for(int j=0;j<n;j++) 
+                if(a[i][j]&&(!mark[j])){ 
+                    mark[j]=1; 
+                    queue.enqueue(j); 
+                } 
+        } 
+        queue.init(); 
+        for(int i=0;i<len-1;i++) 
+            cout<<result[i]<<" "; 
+        cout<<result[len-1]<<endl; 
+    } 
+    //system("pause"); 
+} 
+5.字符串过滤
+#include<iostream> 
+#include<cstring> 
+using namespace std; 
+int main() 
+{ 
+    int t; 
+    cin>>t; 
+    char a[100],b[100]; 
+    while(t--){ 
+        cin>>a; 
+        int lena=strlen(a); 
+        int lenb=0; 
+        bool sign=true; 
+        for(int i=0;i<lena;i++){ 
+            for(int j=0;j<lenb;j++){ 
+                if(b[j]==a[i]){ 
+                    sign=false; 
+                    break; 
+                } 
+            } 
+            if(sign) 
+                b[lenb++]=a[i]; 
+            sign=true; 
+        } 
+        b[lenb]='\0'; 
+        cout<<b<<endl; 
+ 6. 单链表节点调换
+ #include<iostream> 
+#include<cstring> 
+using namespace std; 
+int main() 
+{ 
+    int t,num; 
+    cin>>t; 
+    int a[100]; 
+    while(t--){ 
+        int len=0; 
+        int count=0; 
+        while(cin>>num){ 
+            if(num==-1) 
+                break; 
+            count++; 
+            if(count%2) 
+                a[len+1]=num; 
+            else
+                a[len-1]=num; 
+            len++; 
+        } 
+        if(count%2) 
+            a[len-1]=a[len]; 
+        for(int i=0;i<len;i++) 
+            cout<<a[i]<<" "; 
+        cout<<endl; 
+    } 
+} 

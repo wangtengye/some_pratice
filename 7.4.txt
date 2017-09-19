@@ -1,0 +1,302 @@
+//---------------Á´±í-----------------
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+
+template<typename E>class Link
+{
+public:
+    E element;
+    Link *next;
+    Link(const E& elemval,Link*nextVal=NULL)
+    {
+        element=elemval;
+        next=nextVal;
+    }
+    Link(Link* nextval=NULL)
+    {
+        next=nextval;
+    }
+};
+template<typename E>
+class LList
+{
+private:
+    Link<E>* head;
+    Link<E>* tail;
+    Link<E>* curr;
+    int cnt;
+    void init()
+    {
+        curr=tail=head=new Link<E>;
+        cnt=0;
+    }
+    void removeAll()
+    {
+        while(head!=NULL)
+        {
+            curr=head;
+            head=head->next;
+            delete curr;
+        }
+    }
+public:
+    LList()
+    {
+        init();
+    }
+
+    void clear()
+    {
+        removeAll();
+        init();
+    }
+    bool isEmpty(){
+        if(cnt)
+            return false;
+        return true;
+    }
+    void insert(const E& it)
+    {
+        curr->next=new Link<E>(it,curr->next);
+        if(curr==tail)
+            tail=curr->next;
+        cnt++;
+    }
+    void append(const E &it)
+    {
+        tail=tail->next=new Link<E>(it,NULL);
+        cnt++;
+    }
+    E remove()
+    {
+        E it=curr->next->element;
+        Link<E>* ltemp=curr->next;
+        if(tail==curr->next)
+            tail=curr;
+        curr->next=ltemp->next;
+        delete ltemp;
+        cnt--;
+        return it;
+    }
+    void moveToStart(){curr=head;}
+    void moveToEnd(){curr=tail;}
+    void pre()
+    {
+        if(curr==head)
+            return;
+        Link<E>* temp=head;
+        while(temp->next!=curr)
+            temp=temp->next;
+        curr=temp;
+    }
+    void next()
+    {
+        curr=curr->next;
+    }
+    int length()const{return cnt;}
+    int currPos() const
+    {
+        Link<E>* temp=head;
+        int i;
+        for( i=0;temp!=curr;i++)
+            temp=temp->next;
+        return i;
+    }
+    void moveToPos(int pos)
+    {
+        curr=head;
+        for(int i=0;i<pos;i++)
+            curr=curr->next;
+    }
+    const E& getValue()const
+    {
+        return curr->next->element;
+    }
+    void print()
+    {
+        for(moveToPos(0);currPos()<length();next())
+            cout<<getValue()<<" ";
+        cout<<endl;
+    }
+
+};
+LList<int> mergesort(LList<int> inlist) {
+    LList<int> templist[2];
+    if (inlist.length() <= 1)
+        return inlist;
+    inlist.moveToStart();
+    int curr = 0;
+    int item;
+    while (!inlist.isEmpty()) {
+        item=inlist.remove();
+        templist[curr].append(item);
+        curr = (curr + 1) % 2;
+    }
+    mergesort(templist[0]);
+    mergesort(templist[1]);
+    templist[0].moveToStart();
+    templist[1].moveToStart();
+    while ((!templist[0].isEmpty() )||(!templist[1].isEmpty())) {
+        if (templist[0].isEmpty()) {
+            item=templist[1].remove();
+            inlist.append(item);
+        }
+        else if (templist[1].isEmpty()) {
+            item=templist[0].remove();
+            inlist.append(item);
+        }
+        else if (templist[0].getValue()<templist[1].getValue()) {
+            item = templist[0].remove();
+            inlist.append(item);
+        }
+        else {
+            item = templist[1].remove();
+            inlist.append(item);
+        }
+    }
+    return inlist;
+}
+int main()
+{
+    LList<int> inlist;
+    srand((unsigned)time(NULL));
+    for(int i=0;i<50;i++)
+        inlist.append(rand());
+    inlist.print();
+    inlist=mergesort(inlist);
+    inlist.print();
+}
+
+//-----------------Ë³Ðò±í---------------------
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+template<class E>
+class AList
+{
+private:
+    int maxSize;
+    int listSize;
+    int curr;
+    E* listArray;
+public:
+    AList(){}
+    AList(int s)
+    {
+        maxSize=s;
+        listSize=curr=0;
+        listArray=new E[maxSize];
+    }
+    bool isEmpty()
+    {
+        if(length())
+            return false;
+        return true;
+    }
+    void clear1()
+    {
+        delete[] listArray;
+        listSize=curr=0;
+        listArray=new E[maxSize];
+    }
+    void insert1(const E& it)
+    {
+        for(int i=listSize;i>curr;i--)
+            listArray[i]=listArray[i-1];
+        listArray[curr]=it;
+        listSize++;
+    }
+    void append(const E &it)
+    {
+        listArray[listSize++]=it;
+    }
+    E remove1()
+    {
+        E it=listArray[curr];
+        for(int i=curr;i<listSize-1;i++)
+            listArray[i]=listArray[i+1];
+        listSize--;
+        return it;
+    }
+    void moveToStart(){curr=0;}
+    void moveToEnd(){curr=listSize;}
+    void pre()
+    {
+        if(curr!=0)
+            curr--;
+    }
+    void next()
+    {
+        if(curr<listSize)
+            curr++;
+    }
+    int length()const{return listSize;}
+    int currPos() const{return curr;}
+    void moveToPos(int pos)
+    {
+        curr=pos;
+    }
+    const E& getValue()const
+    {
+        return listArray[curr];
+    }
+    void print()
+    {
+        for(moveToStart();currPos()<length();next())
+            cout<<getValue()<<" ";
+        cout<<endl;
+    }
+};
+AList<int> mergesort(AList<int> inlist) {
+    AList<int> templist[2];
+    AList<int> t1(100);
+    AList<int> t2(100);
+    templist[0]=t1;
+    templist[1]=t2;
+    if (inlist.length() <= 1)
+        return inlist;
+    inlist.moveToStart();
+    int curr = 0;
+    int item;
+    while (!inlist.isEmpty()) {
+        item=inlist.remove1();
+        templist[curr].append(item);
+        curr = (curr + 1) % 2;
+    }
+    mergesort(templist[0]);
+    mergesort(templist[1]);
+    templist[0].moveToStart();
+    templist[1].moveToStart();
+    while ((!templist[0].isEmpty() )||(!templist[1].isEmpty())) {
+        if (templist[0].isEmpty()) {
+            item=templist[1].remove1();
+            inlist.append(item);
+        }
+        else if (templist[1].isEmpty()) {
+            item=templist[0].remove1();
+            inlist.append(item);
+        }
+        else if (templist[0].getValue()<templist[1].getValue()) {
+            item = templist[0].remove1();
+            inlist.append(item);
+        }
+        else {
+            item = templist[1].remove1();
+            inlist.append(item);
+        }
+    }
+    return inlist;
+}
+int main()
+{
+    AList<int> inlist(100);
+    srand((unsigned)time(NULL));
+    for(int i=0;i<100;i++)
+        inlist.append(rand());
+    inlist.print();
+    inlist=mergesort(inlist);
+    inlist.print();
+}

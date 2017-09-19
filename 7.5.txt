@@ -1,0 +1,254 @@
+-------------(a)-------------
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+int a[100];
+void print(int j)
+{
+    for(int i=0;i<j;i++)
+        cout<<a[i]<<" ";
+    cout<<endl;
+}
+void swap1(int i,int j)
+{
+    int temp=a[i];
+    a[i]=a[j];
+    a[j]=temp;
+}
+int findpivot(int i,int j)
+{
+    int mid=(i+j)/2;
+    if(a[mid]>a[i]&&a[mid]<a[j])
+        return mid;
+    else if(a[i]>a[mid]&&a[i]<a[j])
+        return i;
+    return j;
+}
+int partition1(int l,int r,int pivot)
+{
+    while(l<r)
+    {
+        while(a[l]<pivot)
+            l++;
+        while((r>l)&&(a[r]>=pivot))
+            r--;
+        swap1(l,r);
+    }
+    return l;
+}
+
+void qsort(int i,int j)
+{
+    if(j<=i)
+        return;
+    int pivotindex=findpivot(i,j);
+    swap1(pivotindex,j);
+    int k=partition1(i,j,a[j]);
+    swap1(k,j);
+    qsort(i,k-1);
+    qsort(k+1,j);
+}
+
+int main()
+{
+   int i=0;
+    srand((unsigned)time(NULL));
+    for(i=0;i<50;i++)
+        a[i]=rand();
+    print(i);
+    qsort(0,i-1);
+    print(i);
+}
+----------(b)-------------------
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+#include<cmath>
+using namespace std;
+int a[100];
+void print(int j)
+{
+    for(int i=0;i<j;i++)
+        cout<<a[i]<<" ";
+    cout<<endl;
+}
+void swap1(int i,int j)
+{
+    int temp=a[i];
+    a[i]=a[j];
+    a[j]=temp;
+}
+int findpivot(int i,int j)
+{
+    int mid=(i+j)/2;
+    if(a[mid]>a[i]&&a[mid]<a[j])
+        return mid;
+    else if(a[i]>a[mid]&&a[i]<a[j])
+        return i;
+    return j;
+}
+int partition1(int l,int r,int pivot)
+{
+    while(l<r)
+    {
+        while(a[l]<pivot)
+            l++;
+        while((r>l)&&(a[r]>=pivot))
+            r--;
+        swap1(l,r);
+    }
+    return l;
+}
+void inssort(int aa,int b)
+{
+    for(int i=aa+1;i<=b;i++)
+        for(int j=i;(j>0)&&(a[j]<a[j-1]);j--)
+            swap1(j-1,j);
+}
+void qsort(int i,int j)
+{
+    if(j<=i)
+        return;
+    int n=j-i+1;
+    if(n*(n-1)<log(n)){
+        inssort(i,j);
+        return;
+    }
+    int pivotindex=findpivot(i,j);
+    swap1(pivotindex,j);
+    int k=partition1(i,j,a[j]);
+    swap1(k,j);
+    qsort(i,k-1);
+    qsort(k+1,j);
+}
+
+int main()
+{
+   int i=0;
+    srand((unsigned)time(NULL));
+    for(i=0;i<50;i++)
+        a[i]=rand();
+    print(i);
+    qsort(0,i-1);
+    print(i);
+}
+
+--------------------(c)------------------
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+#include<cmath>
+using namespace std;
+int a[100];
+template<typename E>
+class AStack
+{
+private:
+    int maxSize;
+    int top;
+    E *listArray;
+public:
+    AStack(int s)
+    {
+        maxSize=s;
+        top=0;
+        listArray=new E[s];
+    }
+    ~AStack(){delete [] listArray;}
+    void clear1()
+    {
+        top=0;
+    }
+    void push(const E&it)
+    {
+        listArray[top++]=it;
+    }
+    E pop()
+    {
+        return listArray[--top];
+    }
+    const E&topValue()const
+    {
+        return listArray[top-1];
+    }
+    int length() const
+    {
+        return top;
+    }
+    void print()
+    {
+        while(top!=0)
+            cout<<pop()<<" ";
+        cout<<endl;
+    }
+};
+void print(int j)
+{
+    for(int i=0;i<j;i++)
+        cout<<a[i]<<" ";
+    cout<<endl;
+}
+void swap1(int i,int j)
+{
+    int temp=a[i];
+    a[i]=a[j];
+    a[j]=temp;
+}
+int findpivot(int i,int j)
+{
+    int mid=(i+j)/2;
+    if(a[mid]>a[i]&&a[mid]<a[j])
+        return mid;
+    else if(a[i]>a[mid]&&a[i]<a[j])
+        return i;
+    return j;
+}
+int partition1(int l,int r,int pivot)
+{
+    while(l<r)
+    {
+        while(a[l]<pivot)
+            l++;
+        while((r>l)&&(a[r]>=pivot))
+            r--;
+        swap1(l,r);
+    }
+    return l;
+}
+void qsort(int i,int j)
+{
+    AStack<int> s(100);
+    s.push(i);
+    s.push(j);
+    while(s.length()){
+        j=s.pop();
+        i=s.pop();
+        int pivotindex=findpivot(i,j);
+        swap1(pivotindex,j);
+        int k=partition1(i,j,a[j]);
+        swap1(k,j);
+        if(k+1<j){
+            s.push(k+1);
+            s.push(j);
+        }
+        if(k-1>i){
+            s.push(i);
+            s.push(k-1);
+        }
+    }
+}
+
+int main()
+{
+   int i=0;
+    srand((unsigned)time(NULL));
+    for(i=0;i<100;i++)
+        a[i]=rand();
+    print(i);
+    qsort(0,i-1);
+    print(i);
+}
+
+
+

@@ -1,0 +1,77 @@
+11.15
+#include<iostream>
+#include<cstring>
+using namespace std;
+int a[100][100], b[100][100];
+int mark[100];
+int len=0;
+bool flag;
+void dfs(int i,int n)
+{
+    if(mark[i]){
+        flag=true;
+        return;
+    }
+    mark[i]=1;
+    for(int j=0;j<n;j++)
+        if(b[i][j]) {
+            b[i][j]=0;
+            b[j][i]=0;
+            dfs(j,n);
+        }
+}
+void copyArray(int n)
+{
+    for(int i=0;i<n;i++)
+        for(int j=0;j<n;j++)
+            b[i][j]=a[i][j];
+}
+int main()
+{
+    int t,n,e,e1,e2;//t测试次数，n为点数，e为边数
+    cin>>t;
+    while(t--){
+        cin>>n>>e;
+        for(int i=0;i<n;i++)
+            for(int j=0;j<n;j++)
+                a[i][j]=0;
+        len=0;
+        while(e--){
+            cin>>e1>>e2;
+            a[e1][e2]=1;
+            a[e2][e1]=1;
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++)
+                mark[j]=0;
+            flag=false;
+            if(flag)
+                break;
+            copyArray(n);
+            dfs(i,n);
+        }
+        if(flag)
+            cout<<"cyclic"<<endl;
+        else
+            cout<<"acyclic"<<endl;
+    }
+}
+测试样例
+2
+6 6
+0 1
+1 2
+2 3
+3 4
+4 5
+5 0
+6 6
+0 1
+0 2
+0 3
+0 4
+0 5
+5 4
+输出：
+cyclic
+cyclic

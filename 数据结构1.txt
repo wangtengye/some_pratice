@@ -1,0 +1,572 @@
+1.顺序表和链表
+
+#include <iostream>
+#include<assert.h>
+using namespace std;
+template<typename E>
+class List
+{
+public:
+    List(){}
+    virtual ~List(){}
+    virtual void clear1()=0;
+    virtual void insert1(const E& item)=0;
+    virtual void append(const E& item)=0;
+    virtual E remove1()=0;
+    virtual void moveToStart()=0;
+    virtual void moveToEnd()=0;
+    virtual void pre()=0;
+    virtual void next()=0;
+    virtual int length() const=0;
+    virtual int currPos()const=0;
+    virtual void moveToPos(int pos)=0;
+    virtual const E&getValue() const=0;
+};
+----------顺序表------------
+template<typename E>
+class AList:public List<E>
+{
+private:
+    int maxSize;
+    int listSize;
+    int curr;
+    E* listArray;
+public:
+
+    AList(int s)
+    {
+        maxSize=s;
+        listSize=curr=0;
+        listArray=new E[maxSize];
+    }
+    ~AList(){delete[] listArray;}
+    void clear1()
+    {
+        delete[] listArray;
+        listSize=curr=0;
+        listArray=new E[maxSize];
+    }
+    void insert1(const E& it)
+    {
+        assert(listSize<maxSize);
+        for(int i=listSize;i>curr;i--)
+            listArray[i]=listArray[i-1];
+        listArray[curr]=it;
+        listSize++;
+    }
+    void append(const E &it)
+    {
+        assert(listSize<maxSize);
+        listArray[listSize++]=it;
+    }
+    E remove1()
+    {
+        assert((curr>=0)&&(curr<listSize));
+        E it=listArray[curr];
+        for(int i=curr;i<listSize-1;i++)
+            listArray[i]=listArray[i+1];
+        listSize--;
+        return it;
+    }
+    void moveToStart(){curr=0;}
+    void moveToEnd(){curr=listSize;}
+    void pre()
+    {
+        if(curr!=0)
+            curr--;
+    }
+    void next()
+    {
+        if(curr<listSize)
+            curr++;
+    }
+    int length()const{return listSize;}
+    int currPos() const{return curr;}
+    void moveToPos(int pos)
+    {
+        assert((pos>=0)&&(pos<=listSize));
+        curr=pos;
+    }
+    const E& getValue()const
+    {
+        assert((curr>=0)&&(curr<listSize));
+        return listArray[curr];
+    }
+    void print()
+    {
+        for(moveToStart();currPos()<length();next())
+            cout<<getValue()<<" ";
+        cout<<endl;
+    }
+
+};
+-----------链表------------
+template<typename E>class Link
+{
+public:
+    E element;
+    Link *next;
+    Link(const E& elemval,Link*nextVal=NULL)
+    {
+        element=elemval;
+        next=nextVal;
+    }
+    Link(Link* nextval=NULL)
+    {
+        next=nextval;
+    }
+};
+template<typename E>
+class LList:public List<E>
+{
+private:
+    Link<E>* head;
+    Link<E>* tail;
+    Link<E>* curr;
+    int cnt;
+    void init()
+    {
+        curr=tail=head=new Link<E>;
+        cnt=0;
+    }
+    void removeAll()
+    {
+        while(head!=NULL)
+        {
+            curr=head;
+            head=head->next;
+            delete curr;
+        }
+    }
+public:
+    LList()
+    {
+        init();
+    }
+    ~LList(){removeAll();}
+    void clear1()
+    {
+        removeAll();
+        init();
+    }
+    void insert1(const E& it)
+    {
+        curr->next=new Link<E>(it,curr->next);
+        if(curr==tail)
+            tail=curr->next;
+        cnt++;
+    }
+    void append(const E &it)
+    {
+        tail=tail->next=new Link<E>(it,NULL);
+        cnt++;
+    }
+    E remove1()
+    {
+        assert((curr->next!=NULL));
+        E it=curr->next->element;
+        Link<E>* ltemp=curr->next;
+        if(tail==curr->next)
+            tail=curr;
+        curr->next=ltemp->next;
+        delete ltemp;
+        cnt--;
+        return it;
+    }
+    void moveToStart(){curr=head;}
+    void moveToEnd(){curr=tail;}
+    void pre()
+    {
+        if(curr==head)
+            return;
+        Link<E>* temp=head;
+        while(temp->next!=curr)
+            temp=temp->next;
+        curr=temp;
+    }
+    void next()
+    {
+        curr=curr->next;
+    }
+    int length()const{return cnt;}
+    int currPos() const
+    {
+        Link<E>* temp=head;
+        int i;
+        for( i=0;temp!=curr;i++)
+            temp=temp->next;
+        return i;
+    }
+    void moveToPos(int pos)
+    {
+        assert((pos>=0)&&(pos<=cnt));
+        curr=head;
+        for(int i=0;i<pos;i++)
+            curr=curr->next;
+    }
+    const E& getValue()const
+    {
+        assert(curr->next!=NULL);
+        return curr->next->element;
+    }
+    void print()
+    {
+        for(moveToPos(1);currPos()<length();next())
+            cout<<getValue()<<" ";
+        cout<<endl;
+    }
+
+};
+-----------------主函数---------------
+int main()
+{
+    AList<int> aList(10);//LList<int> aList;
+    for(int i=1;i<=10;i++)
+        aList.append(i);
+    aList.remove1();
+    aList.moveToStart();
+    cout<<aList.currPos()<<endl;
+    aList.moveToEnd();
+    cout<<aList.currPos()<<endl;
+    aList.pre();
+    cout<<aList.currPos()<<endl;
+    aList.next();
+    cout<<aList.currPos()<<endl;
+    cout<<aList.length()<<endl;
+    aList.moveToPos(4);
+    cout<<aList.currPos()<<endl;
+    aList.insert1(88);
+    cout<<aList.getValue()<<endl;
+    aList.print();
+}
+-------------测试数据及结果-----------
+数据：1,2,3,4,5,6,7,8,9,10,88  
+结果：0
+      9
+      8
+      9
+      9
+      4
+      88
+      2 3 4 5 88 6 7 8 9 10
+      
+
+2 顺序栈和链栈
+
+#include <iostream>
+#include<assert.h>
+using namespace std;
+template<typename E>
+class Stack
+{
+public:
+    Stack(){}
+    virtual ~Stack(){};
+    virtual void clear1()=0;
+    virtual void push(const E&it)=0;
+    virtual E pop()=0;
+    virtual const E&topValue() const=0;
+    virtual int length() const=0;
+};
+
+---------------顺序栈--------------
+template<typename E>
+class AStack:public Stack<E>
+{
+private:
+    int maxSize;
+    int top;
+    E *listArray;
+public:
+    AStack(int s)
+    {
+        maxSize=s;
+        top=0;
+        listArray=new E[s];
+    }
+    ~AStack(){delete [] listArray;}
+    void clear1()
+    {
+        top=0;
+    }
+    void push(const E&it)
+    {
+        assert(top!=maxSize);
+        listArray[top++]=it;
+    }
+    E pop()
+    {
+        assert(top!=0);
+        return listArray[--top];
+    }
+    const E&topValue()const
+    {
+        assert(top!=0);
+        return listArray[top-1];
+    }
+    int length() const
+    {
+        return top;
+    }
+    void print()
+    {
+        while(top!=0)
+            cout<<pop()<<" ";
+        cout<<endl;
+    }
+};
+-------------链栈-------------
+template<typename E>class Link
+{
+public:
+    E element;
+    Link *next;
+    Link(const E& elemval,Link*nextVal=NULL)
+    {
+        element=elemval;
+        next=nextVal;
+    }
+    Link(Link* nextval=NULL)
+    {
+        next=nextval;
+    }
+};
+template<typename E>
+class LStack:public Stack<E>
+{
+private:
+    Link<E>* top;
+    int stackSize;
+public:
+    LStack()
+    {
+        top=NULL;
+        stackSize=0;
+    }
+    ~LStack(){clear1();}
+    void clear1()
+    {
+        while(top!=NULL)
+        {
+            Link<E>*temp=top;
+            top=top->next;
+            delete temp;
+        }
+        stackSize=0;
+    }
+    void push(const E&it)
+    {
+        top=new Link<E>(it, top);
+    }
+    E pop()
+    {
+        assert(top!=NULL);
+        E it=top->element;
+        Link<E>* temp=top;
+        top=top->next;
+        delete temp;
+        return it;
+    }
+    const E&topValue()const
+    {
+        assert(top!=0);
+        return top->element;
+    }
+    int length() const
+    {
+        return stackSize;
+    }
+    void print()
+    {
+        while(top!=0)
+            cout<<pop()<<" ";
+        cout<<endl;
+    }
+};
+-------------主函数-------------
+int main()
+{
+    AStack<int> aStack(10);//LStack<int> aStack;
+    for(int i=1;i<=10;i++)
+        aStack.push(i);
+    cout<<aStack.pop()<<endl;
+    cout<<aStack.topValue()<<endl;
+    aStack.print();
+}
+------------测试数据和结果--------------
+数据：1 2 3 4 5 6 7 8 9 10
+结果：10
+      9
+      9 8 7 6 5 4 3 2 1
+
+
+3  顺序队列和链队列
+
+#include <iostream>
+#include<assert.h>
+using namespace std;
+template<typename E>
+class Queue
+{
+public:
+    Queue(){}
+    virtual ~Queue(){}
+    virtual void clear1()=0;
+    virtual void enqueue(const E&)=0;
+    virtual E dequeue()=0;
+    virtual const E& frontValue()const=0;
+    virtual int length()const=0;
+};
+
+-------------顺序队列-----------
+template<typename E>
+class AQueue:public Queue<E>
+{
+private:
+    int maxSize;
+    int front1;
+    int rear;
+    E *listArray;
+public:
+    AQueue(int s)
+    {
+        maxSize=s;
+        rear=0;
+        front1=1;
+        listArray=new E[s];
+    }
+    ~AQueue(){delete [] listArray;}
+    void clear1()
+    {
+        rear=0;
+        front1=1;
+    }
+    void enqueue(const E& it)
+    {
+        assert((rear+2)%maxSize!=front1);
+        rear=(rear+1)%maxSize;
+        listArray[rear]=it;
+    }
+    E dequeue()
+    {
+        assert(length()!=0);
+        E it=listArray[front1];
+        front1=(front1+1)%maxSize;
+        return it;
+    }
+    const E& frontValue() const
+    {
+        assert(length()!=0);
+        return listArray[front1];
+    }
+    int length()const
+    {
+        return((rear+maxSize)-front1+1)%maxSize;
+    }
+    void print()
+    {
+        for(int i=front1;i<=rear;i++)
+            cout<<listArray[i]<<" ";
+        cout<<endl;
+    }
+};
+----------链队列-------------
+template<typename E>class Link
+{
+public:
+    E element;
+    Link *next;
+    Link(const E& elemval,Link*nextVal=NULL)
+    {
+        element=elemval;
+        next=nextVal;
+    }
+    Link(Link* nextval=NULL)
+    {
+        next=nextval;
+    }
+};
+template<typename E>
+class LQueue:public Queue<E>
+{
+private:
+    Link<E>* front1;
+    Link<E>* rear;
+    int queueSize;
+public:
+    LQueue()
+    {
+        front1=rear=new Link<E>();
+        queueSize=0;
+    }
+    ~LQueue(){clear1();delete front1;}
+    void clear1()
+    {
+        rear=front1->next;
+        while(rear!=NULL)
+        {
+            Link<E>* temp=rear;
+            rear=rear->next;
+            delete temp;
+        }
+        rear=front1;
+        queueSize=0;
+    }
+    void enqueue(const E& it)
+    {
+        rear->next=new Link<E>(it,NULL);
+        rear=rear->next;
+        queueSize++;
+    }
+    E dequeue()
+    {
+        assert(queueSize!=0);
+        E it=front1->next->element;
+        Link<E>* temp=front1->next;
+        front1->next=temp->next;
+        if(rear==temp)
+            rear=front1;
+        delete temp;
+        queueSize--;
+        return it;
+    }
+    const E& frontValue() const
+    {
+        assert(length()!=0);
+        return front1->next->element;
+    }
+    int length()const
+    {
+        return queueSize;
+    }
+    void print()
+    {
+        assert(queueSize!=0);
+        Link<E>* temp=front1->next;
+        while(temp!=NULL)
+        {
+            cout<<temp->element<<" ";
+            temp=temp->next;
+        }
+        cout<<endl;
+    }
+};
+
+
+
+--------------主函数------------
+int main()
+{
+    AQueue<int> aQueue(10);//LQueue<int> aQueue;
+    for(int i=1;i<10;i++)
+        aQueue.enqueue(i);
+    cout<<aQueue.length()<<endl;
+    aQueue.dequeue();
+    cout<<aQueue.frontValue()<<endl;
+    aQueue.print();
+}
+----------测试数据及结果----------
+数据：1 2 3 4 5 6 7 8 9
+结果：9
+      2
+      2 3 4 5 6 7 8 9

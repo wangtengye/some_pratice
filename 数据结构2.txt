@@ -1,0 +1,201 @@
+#include <iostream>
+#include<assert.h>
+using namespace std;
+//AQueue用来实现LBinTree的levelorder功能
+template<typename E>
+class AQueue
+{
+private:
+    int maxSize;
+    int front1;
+    int rear;
+    E *listArray;
+public:
+    AQueue(int s)
+    {
+        maxSize=s;
+        rear=0;
+        front1=1;
+        listArray=new E[s];
+    }
+    ~AQueue(){delete [] listArray;}
+    void clear1()
+    {
+        rear=0;
+        front1=1;
+    }
+    void enqueue(const E& it)
+    {
+        assert((rear+2)%maxSize!=front1);
+        rear=(rear+1)%maxSize;
+        listArray[rear]=it;
+    }
+    E dequeue()
+    {
+        assert(length()!=0);
+        E it=listArray[front1];
+        front1=(front1+1)%maxSize;
+        return it;
+    }
+    const E& frontValue() const
+    {
+        assert(length()!=0);
+        return listArray[front1];
+    }
+    int length()const
+    {
+        return((rear+maxSize)-front1+1)%maxSize;
+    }
+    void print()
+    {
+        for(int i=front1;i<=rear;i++)
+            cout<<listArray[i]<<" ";
+        cout<<endl;
+    }
+};
+
+template<class Elem>
+class BinNode
+{
+private:
+    Elem it;
+    BinNode* lc;
+    BinNode* rc;
+public:
+    BinNode()
+    {
+        lc=rc=NULL;
+    }
+    BinNode(Elem e,BinNode* l=NULL, BinNode* r=NULL)
+    {
+        it=e;
+        lc=l;
+        rc=r;
+    }
+    Elem& val( )
+    {
+        return it;
+    }
+    void setVal( const Elem& e)
+    {
+        it=e;
+    }
+    BinNode* left( ) const
+    {
+        return lc;
+    }
+    void setLeft( BinNode* b)
+    {
+        lc=b;
+    }
+     BinNode* right( ) const
+    {
+        return rc;
+    }
+    void setRight( BinNode* b)
+    {
+        rc=b;
+    }
+    bool isLeaf()
+    {
+        return (lc==NULL)&&(rc==NULL);
+    }
+};
+
+template<class Elem>
+class LBinTree
+{
+private:
+    BinNode<Elem>* root=NULL;
+public:
+
+    BinNode<Elem>* getRoot()
+    {
+        return root;
+    }
+    void setRoot(BinNode<Elem>* r)
+    {
+        root=r;
+    }
+    void preorder(BinNode<Elem>* subroot)
+    {
+        if(subroot==NULL)
+            return;
+        cout<<subroot->val()<<" ";
+        preorder(subroot->left());
+        preorder(subroot->right());
+    }
+    BinNode<Elem>* build(BinNode<Elem>* r,Elem e)
+    {
+
+        if(r==NULL)
+          return  new BinNode<Elem>(e,NULL,NULL);
+        if(r->left()==NULL)
+            r->setLeft(build(r->left(),e));
+        else if(r->right()==NULL)
+            r->setRight(build(r->right(),e));
+        else
+           build(r->left(),e);
+		return root;
+    }
+    void levelorder(BinNode<Elem>* subroot)
+    {
+        AQueue<BinNode<Elem>*> q(20);
+        q.enqueue(subroot);
+        while(q.length()!=0)
+        {
+            BinNode<Elem>* temp=q.dequeue();
+            if(temp!=NULL){
+                cout<<temp->val()<<" ";
+                q.enqueue(temp->left());
+                q.enqueue(temp->right());
+            }
+        }
+        cout<<endl;
+    }
+    int height(BinNode<Elem>* subroot)
+    {
+        if(subroot==NULL)
+            return 0;
+        return 1+max(height(subroot->left()),height(subroot->right()));
+    }
+    int count1(BinNode<Elem>* subroot)
+    {
+        if(subroot==NULL)
+            return 0;
+        return 1+count1(subroot->left())+count1(subroot->right());
+    }
+};
+
+int main()
+{
+    LBinTree<int> tree;
+    for(int i=1;i<=10;i++)
+        tree.setRoot(tree.build(tree.getRoot(),i));
+    tree.preorder(tree.getRoot());
+    cout<<endl;
+    tree.levelorder(tree.getRoot());
+    cout<<tree.height(tree.getRoot())<<endl;
+    cout<<tree.count1(tree.getRoot())<<endl;
+    
+}
+测试用例及结果：
+
+          mian函数所建立树如下 
+
+
+					1
+				2		3
+			4		5
+		6		7
+	8		9
+10
+
+前序遍历输出：1 2 4 6 8 10 9 7 5 3
+
+
+（习题5.7）leverorder输出：1 2 3 4 5 6 7 8 9 10
+（习题5.8）height of tree:  6
+（习题5.9）count leaf nodes:5
+
+ 

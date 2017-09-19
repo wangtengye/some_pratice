@@ -1,0 +1,408 @@
+-------------linear probing-------
+#include<iostream>
+#include<assert.h>
+using namespace std;
+
+template <typename Key,typename E>
+class Dictionary
+{
+public:
+    virtual void clear()=0;
+    virtual void insert(const Key& k,const E& e)=0;
+    virtual E remove(const Key & k)=0;
+    virtual E find(const Key& k)=0;
+    virtual int size()=0;
+};
+template <typename Key,typename E>
+class KVpair
+{
+private:
+    Key k;
+    E e;
+public:
+    KVpair(){}
+    KVpair(Key k,E e){
+      this->k=k;
+      this->e=e;
+    }
+    Key key(){return k;}
+    void setKey(Key ink){k=ink;}
+    E value(){return e;}
+};
+template <typename Key,typename E>
+class hashdict:public Dictionary<Key,E>
+{
+private:
+    KVpair<Key,E> *HT;
+    int M;
+    int currcnt;
+    Key emptyKey;
+    Key tomb;
+    int p(Key k,int i) const{return i;}
+    int h(int x) const{ return x%M;}
+    int h(char * x) const{
+        int i,sum;
+        for(sum=0,i=0;x[i]!='\0';i++)
+            sum+=(int)x[i];
+        return sum%M;
+    }
+    void hashInsert(const Key& k,const E &e){
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(emptyKey!=HT[pos].key())&&(tomb!=HT[pos].key());i++){
+            pos=(home+p(k,i))%M;
+            assert(k!=HT[pos].key());
+        }
+        KVpair<Key,E> temp(k,e);
+        HT[pos]=temp;
+    }
+    E hashSearch(const Key& k)const{
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(k!=HT[pos].key())&&(emptyKey!=HT[pos].key());i++)
+            pos=(home+p(k,i))%M;
+        if(k==HT[pos].key())
+            return HT[pos].value();
+        else
+            return NULL;
+    }
+    E hashDel(const Key& k){
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(k!=HT[pos].key())&&(emptyKey!=HT[pos].key());i++)
+            pos=(home+p(k,i))%M;
+        if(k==HT[pos].key()){
+            HT[pos].setKey(tomb);
+            return HT[pos].value();
+        }
+        else
+            return NULL;
+    }
+public:
+    hashdict(int sz,Key k,Key t){
+        M=sz;
+        emptyKey =k;
+        tomb=t;
+        currcnt=0;
+        HT=new KVpair<Key,E>[sz];
+        for(int i=0;i<M;i++)
+            HT[i].setKey(emptyKey);
+    }
+    void clear(){
+        currcnt=0;
+        for(int i=0;i<M;i++)
+            HT[i].setKey(emptyKey);
+    }
+    void insert(const Key&k,const E&e){
+        hashInsert(k,e);
+        currcnt++;
+    }
+
+    E remove(const Key& k){
+        currcnt--;
+        return hashDel(k);
+    }
+    E find(const Key & k){
+        return hashSearch(k);
+    }
+    int size(){return currcnt;}
+    void print(){
+        for(int i=0;i<M;i++)
+            if((HT[i].key()!=emptyKey)&&(HT[i].key()!=tomb))
+                cout<<i<<" "<<HT[i].value()<<"; ";
+        cout<<endl;
+    }
+};
+int main()
+{
+    hashdict<int,string> hd(50,0,-1);
+    hd.insert(1,"张三");
+    hd.insert(2,"李四");
+    hd.insert(3,"小窝");
+    hd.insert(4,"王五");
+    hd.insert(5,"小城");
+    hd.insert(51,"王维");
+    hd.insert(101,"李白");
+    hd.print();
+    cout<<hd.remove(2)<<endl;
+    cout<<hd.find(3)<<endl;
+}
+-------结果----------------
+1 张三; 2 李四; 3 小窝; 4 王五; 5 小城; 6 王维; 7 李白;
+李四
+小窝
+
+
+---------------quadratic probing------
+#include<iostream>
+#include<assert.h>
+using namespace std;
+
+template <typename Key,typename E>
+class Dictionary
+{
+public:
+    virtual void clear()=0;
+    virtual void insert(const Key& k,const E& e)=0;
+    virtual E remove(const Key & k)=0;
+    virtual E find(const Key& k)=0;
+    virtual int size()=0;
+};
+template <typename Key,typename E>
+class KVpair
+{
+private:
+    Key k;
+    E e;
+public:
+    KVpair(){}
+    KVpair(Key k,E e){
+      this->k=k;
+      this->e=e;
+    }
+    Key key(){return k;}
+    void setKey(Key ink){k=ink;}
+    E value(){return e;}
+};
+template <typename Key,typename E>
+class hashdict:public Dictionary<Key,E>
+{
+private:
+    KVpair<Key,E> *HT;
+    int M;
+    int currcnt;
+    Key emptyKey;
+    Key tomb;
+    int p(Key k,int i) const{return i*i;}
+    int h(int x) const{ return x%M;}
+    int h(char * x) const{
+        int i,sum;
+        for(sum=0,i=0;x[i]!='\0';i++)
+            sum+=(int)x[i];
+        return sum%M;
+    }
+    void hashInsert(const Key& k,const E &e){
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(emptyKey!=HT[pos].key())&&(tomb!=HT[pos].key());i++){
+            pos=(home+p(k,i))%M;
+            assert(k!=HT[pos].key());
+        }
+        KVpair<Key,E> temp(k,e);
+        HT[pos]=temp;
+    }
+    E hashSearch(const Key& k)const{
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(k!=HT[pos].key())&&(emptyKey!=HT[pos].key());i++)
+            pos=(home+p(k,i))%M;
+        if(k==HT[pos].key())
+            return HT[pos].value();
+        else
+            return NULL;
+    }
+    E hashDel(const Key& k){
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(k!=HT[pos].key())&&(emptyKey!=HT[pos].key());i++)
+            pos=(home+p(k,i))%M;
+        if(k==HT[pos].key()){
+            HT[pos].setKey(tomb);
+            return HT[pos].value();
+        }
+        else
+            return NULL;
+    }
+public:
+    hashdict(int sz,Key k,Key t){
+        M=sz;
+        emptyKey =k;
+        tomb=t;
+        currcnt=0;
+        HT=new KVpair<Key,E>[sz];
+        for(int i=0;i<M;i++)
+            HT[i].setKey(emptyKey);
+    }
+    void clear(){
+        currcnt=0;
+        for(int i=0;i<M;i++)
+            HT[i].setKey(emptyKey);
+    }
+    void insert(const Key&k,const E&e){
+        hashInsert(k,e);
+        currcnt++;
+    }
+
+    E remove(const Key& k){
+        currcnt--;
+        return hashDel(k);
+    }
+    E find(const Key & k){
+        return hashSearch(k);
+    }
+    int size(){return currcnt;}
+    void print(){
+        for(int i=0;i<M;i++)
+            if((HT[i].key()!=emptyKey)&&(HT[i].key()!=tomb))
+                cout<<i<<" "<<HT[i].value()<<"; ";
+        cout<<endl;
+    }
+};
+int main()
+{
+    hashdict<int,string> hd(50,0,-1);
+    hd.insert(1,"张三");
+    hd.insert(2,"李四");
+    hd.insert(3,"小窝");
+    hd.insert(4,"王五");
+    hd.insert(5,"小城");
+    hd.insert(51,"王维");
+    hd.insert(101,"李白");
+    hd.print();
+    cout<<hd.remove(2)<<endl;
+    cout<<hd.find(3)<<endl;
+}
+---------结果-----------
+1 张三; 2 李四; 3 小窝; 4 王五; 5 小城; 10 王维; 17 李白;
+李四
+小窝
+
+
+---------pseudorandom probing---------
+#include<iostream>
+#include<assert.h>
+#include<stdlib.h>
+#include<ctime>
+using namespace std;
+
+template <typename Key,typename E>
+class Dictionary
+{
+public:
+    virtual void clear()=0;
+    virtual void insert(const Key& k,const E& e)=0;
+    virtual E remove(const Key & k)=0;
+    virtual E find(const Key& k)=0;
+    virtual int size()=0;
+};
+template <typename Key,typename E>
+class KVpair
+{
+private:
+    Key k;
+    E e;
+public:
+    KVpair(){}
+    KVpair(Key k,E e){
+      this->k=k;
+      this->e=e;
+    }
+    Key key(){return k;}
+    void setKey(Key ink){k=ink;}
+    E value(){return e;}
+};
+template <typename Key,typename E>
+class hashdict:public Dictionary<Key,E>
+{
+private:
+    KVpair<Key,E> *HT;
+    int M;
+    int currcnt;
+    Key emptyKey;
+    Key tomb;
+    int p(Key k,int i) const{
+        srand((unsigned)time(0));
+        return rand()%M;
+    }
+    int h(int x) const{ return x%M;}
+    int h(char * x) const{
+        int i,sum;
+        for(sum=0,i=0;x[i]!='\0';i++)
+            sum+=(int)x[i];
+        return sum%M;
+    }
+    void hashInsert(const Key& k,const E &e){
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(emptyKey!=HT[pos].key())&&(tomb!=HT[pos].key());i++){
+            pos=(home+p(k,i))%M;
+            assert(k!=HT[pos].key());
+        }
+        KVpair<Key,E> temp(k,e);
+        HT[pos]=temp;
+    }
+    E hashSearch(const Key& k)const{
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(k!=HT[pos].key())&&(emptyKey!=HT[pos].key());i++)
+            pos=(home+p(k,i))%M;
+        if(k==HT[pos].key())
+            return HT[pos].value();
+        else
+            return NULL;
+    }
+    E hashDel(const Key& k){
+        int home,pos;
+        home=pos=h(k);
+        for(int i=1;(k!=HT[pos].key())&&(emptyKey!=HT[pos].key());i++)
+            pos=(home+p(k,i))%M;
+        if(k==HT[pos].key()){
+            HT[pos].setKey(tomb);
+            return HT[pos].value();
+        }
+        else
+            return NULL;
+    }
+public:
+    hashdict(int sz,Key k,Key t){
+        M=sz;
+        emptyKey =k;
+        tomb=t;
+        currcnt=0;
+        HT=new KVpair<Key,E>[sz];
+        for(int i=0;i<M;i++)
+            HT[i].setKey(emptyKey);
+    }
+    void clear(){
+        currcnt=0;
+        for(int i=0;i<M;i++)
+            HT[i].setKey(emptyKey);
+    }
+    void insert(const Key&k,const E&e){
+        hashInsert(k,e);
+        currcnt++;
+    }
+
+    E remove(const Key& k){
+        currcnt--;
+        return hashDel(k);
+    }
+    E find(const Key & k){
+        return hashSearch(k);
+    }
+    int size(){return currcnt;}
+    void print(){
+        for(int i=0;i<M;i++)
+            if((HT[i].key()!=emptyKey)&&(HT[i].key()!=tomb))
+                cout<<i<<" "<<HT[i].value()<<"; ";
+        cout<<endl;
+    }
+};
+int main()
+{
+    hashdict<int,string> hd(50,0,-1);
+    hd.insert(1,"张三");
+    hd.insert(2,"李四");
+    hd.insert(3,"小窝");
+    hd.insert(4,"王五");
+    hd.insert(5,"小城");
+    hd.insert(51,"王维");
+    hd.insert(101,"李白");
+    hd.print();
+    cout<<hd.remove(2)<<endl;
+    cout<<hd.find(3)<<endl;
+}
+-------结果----------------
+1 张三; 2 李四; 3 小窝; 4 王五; 5 小城; 20 王维; 23 李白;
+李四
+小窝

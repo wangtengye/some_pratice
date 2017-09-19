@@ -1,0 +1,2 @@
+7.6   stable:Insertion Sort,Bubble Sort,Binsort,Radix Sort.
+      unstable:Selection Sort,Shellsort,Mergesort,Quicksort,Heapsort.
